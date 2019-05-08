@@ -1,11 +1,13 @@
 const mongoDb = require('mongodb');
 const MongoClient = mongoDb.MongoClient;
 
+const { username, pass, myCluster } = require('../config');
+
 let _db;
 
 const mongoConnect = callback => {
   MongoClient.connect(
-    'mongodb+srv://matin:admin@cluster0-zh1eb.mongodb.net/test?retryWrites=true',
+    `mongodb+srv://${username}:${pass}@${myCluster}.mongodb.net/test?retryWrites=true`,
     { useNewUrlParser: true }
   )
     .then(client => {

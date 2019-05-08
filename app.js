@@ -33,17 +33,6 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-const MongoClient = require('mongodb').MongoClient;
-const uri =
-  'mongodb+srv://matin:admin@cluster0-zh1eb.mongodb.net/test?retryWrites=true';
-const client = new MongoClient(uri, { useNewUrlParser: true });
-client.connect(err => {
-  const collection = client.db('test').collection('devices');
-  console.log(err);
-  // perform actions on the collection object
-  client.close();
-});
-
 mongoConnect(() => {
   app.listen(3000, () => {
     console.log('is listening...\n');
