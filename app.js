@@ -5,8 +5,9 @@ const parser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const mongoDBStore = require('connect-mongodb-session')(session);
-const csurf = require('csurf');
+const csrf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
 
 const { username, pass, myCluster } = require('./config');
 
@@ -20,7 +21,35 @@ const store = new mongoDBStore({
   uri: MongoDB_URI,
   collection: 'sessions'
 });
-const csrfProtect = csurf();
+const csrfProtect = csrf();
+
+// MULTER
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname
+    );
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+const upload = multer({ storage: fileStorage, fileFilter: fileFilter });
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -33,8 +62,10 @@ const authRoutess = require('./routes/auth');
 
 //
 
-app.use(parser.urlencoded({ extended: false }));
+app.use(parser.urlencoded({ extended: true }));
+app.use(upload.single('image'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(
   session({
     secret: 'my secret',
@@ -48,7 +79,6 @@ app.use(csrfProtect);
 app.use(flash());
 
 // AUTH TOKEN
-
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
   res.locals.csrfToken = req.csrfToken();
@@ -84,12 +114,17 @@ app.use(authRoutess);
 
 app.get('/500', errorController.get500);
 app.use(errorController.get404);
+
 app.use((error, req, res, next) => {
+  // res.status(error.httpStatusCode).render('500', { error: error });
   // res.redirect('/500');
+  console.log(error);
+  const LoggedIn = req.session.isLoggedIn;
+
   res.status(500).render('500', {
     title: 'Error!',
     path: '/500',
-    isAuthenticated: req.session.isLoggedIn
+    isAuthenticated: LoggedIn
   });
 });
 

@@ -5,6 +5,7 @@ const { body } = require('express-validator/check');
 
 const adminController = require('../controllers/admin');
 const isAuth = require('../middleware/is-auth');
+// const uploadController = require('../controllers/upload');
 
 const router = express.Router();
 
@@ -21,13 +22,13 @@ router.post(
     .isString()
     .isLength({ min: 3 })
     .trim(),
-  body('imageUrl').isURL(),
   body('price').isFloat(),
   body('description')
     .isAlphanumeric()
     .isLength({ min: 5, max: 300 })
     .trim(),
   isAuth,
+  // uploadController.upload.single('image'),
   adminController.postAddProduct
 );
 
@@ -39,13 +40,13 @@ router.post(
     .isString()
     .isLength({ min: 3 })
     .trim(),
-  body('imageUrl').isURL(),
   body('price').isFloat(),
   body('description')
     .isAlphanumeric()
     .isLength({ min: 5, max: 300 })
     .trim(),
   isAuth,
+  // uploadController.upload.single('image'),
   adminController.postEditProduct
 );
 

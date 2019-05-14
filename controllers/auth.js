@@ -163,16 +163,18 @@ exports.postSignup = (req, res, next) => {
     .then(result => {
       res.redirect('/login');
 
-      let data = {
-        from: `${fromSender}`,
-        to: email,
-        subject: 'Hello new user',
-        html:
-          '<h1>Congratulations for signing up. You are truly awesome! :D </h1>'
-      };
-      return mailgun.messages().send(data, function(error, body) {
-        console.log(body);
-      });
+      // SIGNUP MAIL
+
+      // let data = {
+      //   from: `${fromSender}`,
+      //   to: email,
+      //   subject: 'Hello new user',
+      //   html:
+      //     '<h1>Congratulations for signing up. You are truly awesome! :D </h1>'
+      // };
+      // return mailgun.messages().send(data, function(error, body) {
+      //   console.log(body);
+      // });
     })
     .catch(err => {
       console.log(err);
