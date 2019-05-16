@@ -12,6 +12,8 @@ const multer = require('multer');
 const { username, pass, myCluster } = require('./config');
 
 const errorController = require('./controllers/error');
+const shopController = require('./controllers/shop');
+const isAuth = require('./middleware/is-auth');
 const User = require('./models/user');
 
 const MongoDB_URI = `mongodb+srv://${username}:${pass}@${myCluster}.mongodb.net/shop?retryWrites=true`;
@@ -75,13 +77,13 @@ app.use(
   })
 );
 
-app.use(csrfProtect);
+// CSRF used to be here <---
 app.use(flash());
 
 // AUTH TOKEN
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
+  // CSRF middleware used to be here
   next();
 });
 
@@ -104,13 +106,23 @@ app.use((req, res, next) => {
     });
 });
 
-// using routes
+// using routes //
+app.post('/create-order', isAuth, shopController.postOrder);
+
+// in order for stripe to work, csrf comes after
+app.use(csrfProtect);
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+// end of csrf //
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutess);
 
-//
+// end of routes //
 
 app.get('/500', errorController.get500);
 app.use(errorController.get404);
